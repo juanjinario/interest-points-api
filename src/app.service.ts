@@ -18,18 +18,26 @@ export class AppService {
   }
 
   async findAllPlaces({ type = 'bus_station' }): Promise<any> {
-    let response = [];
+    const bottomLeftCoords = { ...limitCoords['bottom-left'] };
+    const minLatitude = 0.02; // value to traverse latitude
     const topLeftCoords = { ...limitCoords['top-left'] };
     const topRightCoords = { ...limitCoords['top-right'] };
-    const rowPlaces = await this.getAllPlacesInRow({
-      topLeftCoords,
-      topRightCoords,
-    });
-    response = [...response, ...rowPlaces];
+    const initLatitude = topLeftCoords.lat;
+    let response = [];
+    while (topLeftCoords.lat > bottomLeftCoords.lat) {
+      const rowPlaces = await this.getAllPlacesInRow({
+        topLeftCoords,
+        topRightCoords,
+      });
+      response = [...response, ...rowPlaces];
+      topLeftCoords.lat = topLeftCoords.lat - minLatitude;
+    }
+    topLeftCoords.lat = initLatitude;
     return response;
   }
 
   async getAllPlacesInRow({ topLeftCoords, topRightCoords }): Promise<any[]> {
+    const initLong = topLeftCoords.long;
     const key = this.gmapKey;
     const minLongitude = 0.02; // value to traverse longitude
     let response = [];
@@ -43,12 +51,14 @@ export class AppService {
       response = [...response, ...apiResults];
       topLeftCoords.long = topLeftCoords.long + minLongitude;
     }
+    topLeftCoords.long = initLong;
     return response;
   }
 
   async getPlacesByParams({ key, location, radius, type = 'bus_station' }) {
     const url = `${this.baseUrl}?key=${key}&location=${location}&radius=${radius}&type=${type}`;
     const { data } = await firstValueFrom(this.httpService.get(url));
+    console.log(data, location);
     return data;
   }
 }
