@@ -18,9 +18,9 @@ export class AppService {
   }
 
   async findAllPlaces({ type = 'bus_station' }): Promise<any> {
+    let response = [];
     const topLeftCoords = { ...limitCoords['top-left'] };
     const topRightCoords = { ...limitCoords['top-right'] };
-    let response = [];
     const rowPlaces = await this.getAllPlacesInRow({
       topLeftCoords,
       topRightCoords,
@@ -49,7 +49,6 @@ export class AppService {
   async getPlacesByParams({ key, location, radius, type = 'bus_station' }) {
     const url = `${this.baseUrl}?key=${key}&location=${location}&radius=${radius}&type=${type}`;
     const { data } = await firstValueFrom(this.httpService.get(url));
-    console.log(data, location);
     return data;
   }
 }
