@@ -12,6 +12,6 @@ export class AppController {
 
   @Get('place')
   getAllPlaces() {
-    return 'eat my dick';
+    return this.appService.findAllPlaces({});
   }
 }
