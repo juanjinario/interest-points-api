@@ -8,7 +8,7 @@ import Utils from './helpers/utils';
 export class AppService {
   gmapKey = '%20AIzaSyCjJLtjmrhwSmSCTLPH-Wi4nGsY_Yx8Ogw' as const;
   baseUrl =
-    'https://maps.googleapis.com/maps/api/place/nearbysearch/json' as const;
+    'https://maps.googleapis.com/maps/api/place/textsearch/json' as const;
   radius = 1110 as const; // Distance between 0.01 latitude/longitude
 
   constructor(private httpService: HttpService) {}
@@ -17,7 +17,7 @@ export class AppService {
     return 'Hello to interest points api!';
   }
 
-  async findAllPlaces({ type = 'bus_station' }): Promise<any> {
+  async findAllPlaces({ query = 'bus station' }): Promise<any> {
     const bottomLeftCoords = { ...limitCoords['bottom-left'] };
     const minLatitude = 0.02; // value to traverse latitude
     const topLeftCoords = { ...limitCoords['top-left'] };
@@ -28,6 +28,7 @@ export class AppService {
       const rowPlaces = await this.getAllPlacesInRow({
         topLeftCoords,
         topRightCoords,
+        query,
       });
       response = [...response, ...rowPlaces];
       topLeftCoords.lat = topLeftCoords.lat - minLatitude;
@@ -36,7 +37,11 @@ export class AppService {
     return response;
   }
 
-  async getAllPlacesInRow({ topLeftCoords, topRightCoords }): Promise<any[]> {
+  async getAllPlacesInRow({
+    query,
+    topLeftCoords,
+    topRightCoords,
+  }): Promise<any[]> {
     const initLong = topLeftCoords.long;
     const key = this.gmapKey;
     const minLongitude = 0.02; // value to traverse longitude
@@ -47,18 +52,39 @@ export class AppService {
         key,
         location,
         radius: this.radius,
+        query,
       });
-      response = [...response, ...apiResults];
+      this.addNoDuplicatesPlacesToList({
+        placeList: response,
+        newPlaces: apiResults,
+      });
       topLeftCoords.long = topLeftCoords.long + minLongitude;
     }
     topLeftCoords.long = initLong;
     return response;
   }
 
-  async getPlacesByParams({ key, location, radius, type = 'bus_station' }) {
-    const url = `${this.baseUrl}?key=${key}&location=${location}&radius=${radius}&type=${type}`;
+  // When it is a nearbysearch a type parameter is required
+  async getPlacesByParams({ key, location, radius, query = 'bus station' }) {
+    const url = `${this.baseUrl}?key=${key}&location=${location}&radius=${radius}&query=${query}`;
     const { data } = await firstValueFrom(this.httpService.get(url));
-    console.log(data, location);
     return data;
+  }
+
+  addNoDuplicatesPlacesToList({ placeList, newPlaces }) {
+    newPlaces.forEach((newPlace) => {
+      if (!this.isPlaceInList({ list: placeList, newPlace })) {
+        placeList.push(newPlace);
+      }
+    });
+  }
+
+  isPlaceInList({ list, newPlace }): boolean {
+    const index = list.findIndex(
+      (listPlace) =>
+        listPlace.geometry?.location?.lat === newPlace.geometry?.location?.lat &&
+        listPlace.geometry?.location?.lng === newPlace.geometry?.location?.lng,
+    );
+    return index >= 0 ? true : false;
   }
 }
