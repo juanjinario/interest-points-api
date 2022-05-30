@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -13,5 +13,10 @@ export class AppController {
   @Get('place')
   getAllPlaces() {
     return this.appService.findAllPlaces({});
+  }
+
+  @Get('place/:province')
+  getAllPlacesByProvince(@Param('province') province: string) {
+    return this.appService.findAllPlaces({ province });
   }
 }

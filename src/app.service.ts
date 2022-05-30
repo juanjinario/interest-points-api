@@ -17,11 +17,14 @@ export class AppService {
     return 'Hello to interest points api!';
   }
 
-  async findAllPlaces({ query = 'bus station' }): Promise<any> {
-    const bottomLeftCoords = { ...limitCoords['bottom-left'] };
+  async findAllPlaces({
+    province = 'valencia',
+    query = 'bus station',
+  }): Promise<any> {
+    const bottomLeftCoords = { ...limitCoords[province]['bottom-left'] };
     const minLatitude = 0.01; // value to traverse latitude
-    const topLeftCoords = { ...limitCoords['top-left'] };
-    const topRightCoords = { ...limitCoords['top-right'] };
+    const topLeftCoords = { ...limitCoords[province]['top-left'] };
+    const topRightCoords = { ...limitCoords[province]['top-right'] };
     const initLatitude = topLeftCoords.lat;
     let response = [];
     while (topLeftCoords.lat > bottomLeftCoords.lat) {
@@ -68,6 +71,7 @@ export class AppService {
   async getPlacesByParams({ key, location, radius, query = 'bus station' }) {
     const url = `${this.baseUrl}?key=${key}&location=${location}&radius=${radius}&query=${query}`;
     const { data } = await firstValueFrom(this.httpService.get(url));
+    console.log(location);
     return data;
   }
 
