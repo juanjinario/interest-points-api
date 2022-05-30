@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { limitCoords } from './data';
+import { limitCoords } from './coords.constants';
 import Utils from './helpers/utils';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class AppService {
 
   async findAllPlaces({ query = 'bus station' }): Promise<any> {
     const bottomLeftCoords = { ...limitCoords['bottom-left'] };
-    const minLatitude = 0.02; // value to traverse latitude
+    const minLatitude = 0.01; // value to traverse latitude
     const topLeftCoords = { ...limitCoords['top-left'] };
     const topRightCoords = { ...limitCoords['top-right'] };
     const initLatitude = topLeftCoords.lat;
@@ -44,7 +44,7 @@ export class AppService {
   }): Promise<any[]> {
     const initLong = topLeftCoords.long;
     const key = this.gmapKey;
-    const minLongitude = 0.02; // value to traverse longitude
+    const minLongitude = 0.01; // value to traverse longitude
     let response = [];
     while (topLeftCoords.long < topRightCoords.long) {
       const location = Utils.coordsToString(topLeftCoords);

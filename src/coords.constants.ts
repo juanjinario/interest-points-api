@@ -4,7 +4,7 @@
 // 4) 39.14 , -0.11  (esquina inferior derecha
 export const limitCoords = {
   'bottom-left': {
-    lat: 39.14,  // lat: 39.14,
+    lat: 39.66,  // lat: 39.14,
     long: -1.00,
   },
   'bottom-right': {
